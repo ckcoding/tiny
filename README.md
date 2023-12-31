@@ -3,7 +3,7 @@
 
 ## 安装
 ```bash
-npm install -g tiny-cli-tool
+npm install -g cli-tiny
 ```
 ## 使用
 ```bash
