@@ -1,6 +1,6 @@
 {
   "name": "cli-tiny",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "基于tinypng的命令行压缩工具",
   "bin": {
     "tiny": "bin/cli.js"

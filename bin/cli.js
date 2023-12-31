@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 const program = require('commander');
 const path = require('path');
-const customVersion = '1.0.3';
+const customVersion = '1.0.4';
 const tiny = require(path.join(__dirname,'..', 'tiny.js'));
 const Tiny = new tiny();
 const colors = require('colors');
 program
 	.usage('图片压缩工具'.green)
 	.option('tiny', 'CN:默认压缩当前文件夹的所有图片！EN:Compress all image files in the current folder by default'.green)
-	.option('-f,  --file [file]', 'CN:压缩单个图片文件！🇺EN:Compress a single image file'.green)
-	.option('-f,  [file] to [file]', 'CN:压缩文件A命名为B！🇺EN:Compress file A named B'.green)
-	.option('-d,  --dir [dir]', 'CN:压缩指定目录下的所有图片文件！🇺EN:Compress all image files in the specified directory'.green)
+	.option('-f,  --file [file]', 'CN:压缩单个图片文件！EN:Compress a single image file'.green)
+	.option('-f,  [file] to [file]', 'CN:压缩文件A命名为B！EN:Compress file A named B'.green)
+	.option('-d,  --dir [dir]', 'CN:压缩指定目录下的所有图片文件！EN:Compress all image files in the specified directory'.green)
 	.option('-d,  [dir] to [dir]', 'CN:压缩文件夹A到文件夹B！EN:Compress folder A named B'.green)
 	.option('-v, --version', 'CN:查看版本信息！EN:View version information'.green)
 	.option('-k,  --key [key]', 'CN:设置tinify key！EN:Set tinify key'.green)
