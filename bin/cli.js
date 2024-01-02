@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const program = require('commander');
 const path = require('path');
-const customVersion = '1.0.4';
+const customVersion = '1.0.5';
 const tiny = require(path.join(__dirname,'..', 'tiny.js'));
 const Tiny = new tiny();
 const colors = require('colors');

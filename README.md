@@ -18,3 +18,6 @@ tiny -c <key> # 清除tiny的key
 tiny -h # 查看帮助
 tiny -v # 查看版本
 ```
+
+## 效果
+![image](images/pic.jpg)
