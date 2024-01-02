@@ -74,8 +74,8 @@ class Tiny {
 				++this.fail
 				this.key = null
 				this.notify(this.fileName,beforeSize,beforeSize,tabMsg);
+				clearTimeout(timer)
 			}, 15000);
-			clearTimeout(timer)
 			await source.toFile(image)
 			msg =  image + '压缩成功'
 			tabMsg = '成功'
