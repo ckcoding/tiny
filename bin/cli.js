@@ -84,7 +84,6 @@ program
 					program.outputHelp();
 					process.exit(1);
 				}
-				break;
 			case '--dir':
 			case '-d':
 				if (arg1 && !arg2 && !arg3) {
@@ -107,7 +106,6 @@ program
 					program.outputHelp();
 					process.exit(1);
 				}
-				break;
 			case '-l':
 			case '--ls':
 				try {
@@ -116,11 +114,9 @@ program
 					console.log('查看失败,请使用管理员权限查看'.red, e);
 				}
 				process.exit(0);
-				break;
 			default:
 				program.outputHelp();
 				process.exit(1);
-				break;
 		}
 	})
 	// 	.error(`CN:错误，找不到该命令，请输入 tiny -h 或者 tiny help 获取帮助信息
