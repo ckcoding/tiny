@@ -6,7 +6,7 @@ const Spinner = require("cli-spinner").Spinner;
 const colors = require('colors');
 const Table = require('cli-table2');
 const keyFIle =  require(path.join(__dirname, 'key.js'))
-const {keyToUse,setKey,lsKey,clearKey} = keyFIle //获取可用的key，更新key文件
+const {getKey,setKey,lsKey,clearKey} = keyFIle //获取可用的key，更新key文件
 const table = new Table({
   head: ['图片'.cyan, '原始'.cyan, '压缩后'.cyan, '压缩比例'.cyan, '结果'.cyan],
   colWidths: [null, null, null, null, null], // 根据实际情况调整列宽
@@ -18,7 +18,7 @@ const table = new Table({
 let currentPath = process.cwd();
 class Tiny {
 	constructor(selector) {
-		this.key  = 'key'
+		this.key = 'key'
 		this.fileName = null
 		this.beforeSize = 0; //压缩前Bety
 		this.afterSize = 0; //压缩后Bety
@@ -26,15 +26,7 @@ class Tiny {
 		this.fail = 0; //失败
 		this.skip = 0; //跳过
 	}
-	getKey(){
-		//拿到所有的key，如果没有就报错请先设置key
-		let key = keyToUse()
-		if(key == null){
-			this.key = null
-			return null
-		}
-		return key
-	}
+
 	//压缩图片
 	async compress(image) {
 		let beforeSize = fs.statSync(image).size;
@@ -53,7 +45,7 @@ class Tiny {
 		let spinner = new Spinner(`${image}  正在压缩中... %s`);
 		spinner.setSpinnerString("|/-\\");
 		spinner.start();
-		let key =  this.getKey();
+		let key =  await getKey();
 		this.key = key
 		if(key == null){
 			spinner.stop(true);

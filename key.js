@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const colors = require('colors');
+const tinify = require('tinify');
 const keyPath = path.join(__dirname, 'config', 'keys.txt');
-const monthPath = path.join(__dirname, 'config', 'month.txt'); 
     // if (!fs.existsSync(keyPath)) {
     //     // 如果不存在，则创建文件夹
     //     fs.mkdirSync(keyPath, { recursive: true });
@@ -23,25 +23,54 @@ function readKeysFromFile(filename) {
     }
     return []
 }
-
 // 获取可用的 Key
-function getKey(keys) {
-    restartKey()
+function getKey() {
+    let keys = readKeysFromFile(keyPath);
     for (const keyInfo of keys) {
         if (keyInfo.remainingUses < 500 && keyInfo.key) {
             keyInfo.remainingUses++;
+            updateKeyFile(keys);
             return keyInfo.key;
         }
     }
     return null; // 没有可用的 Key
 }
 
-function keyToUse(){
+async function restartKey(){
     let keys = readKeysFromFile(keyPath);
-    const keyToUse = getKey(keys);
-    if(keyToUse) updateKeyFile(keys);
-    return keyToUse
+    for (const keyInfo of keys) {
+        let key = keyInfo.key
+        await validateKey(key,keys)
+    }
 }
+
+//验证key是否可用
+function validateKey(key,keys){
+    tinify.key = key;
+    return new Promise((resolve, reject) => {
+        let index = keys.findIndex(item => item?.key == key)
+        tinify.validate(function(err) {
+            if (err) {
+                keys[index].remainingUses = 500
+                updateKeyFile(keys);
+                resolve(false);
+                return
+            };
+            const compressionsThisMonth = tinify.compressionCount
+            if (compressionsThisMonth < 500) {
+                keys[index].remainingUses = compressionsThisMonth
+                updateKeyFile(keys);
+                resolve(true)
+            }else{
+                //给对应key设置为500
+                keys[index].remainingUses = 500
+                updateKeyFile(keys);
+                resolve(false)
+            }
+        })
+    })
+}
+
 
 // 更新 Key 文件中的信息
 function updateKeyFile(keys) {
@@ -67,7 +96,7 @@ function lsKey(){
     let keys = readKeysFromFile(keyPath);
     let table = ``
     keys.forEach(item => {
-        table += `当前key: ${item.key.green} 已用次数: ${String(item.remainingUses).green}\n`
+        table += `当前key: ${item.key.green} 已用次数: ${String(item.remainingUses).green} 剩余使用次数：${String(500 - Number(item.remainingUses)).red}\n`
     })
     return table.toString() || `当前key列表为空`.red
 }
@@ -83,30 +112,4 @@ function clearKey(key){
         return `删除失败，当前key不存在`.red
     }
 }
-//月初重置key
-function restartKey(){
-    const month = new Date().getMonth() + '1';
-    //读去month.txt文件，如果当前月份与文件中的月份不一致，则重置key
-    let monthTxt = fs.readFileSync(monthPath, 'utf-8');
-    if(monthTxt){
-        const lines = monthTxt.split('\n');
-        if(lines[0] != month){
-            fs.writeFileSync(monthPath, month, 'utf-8');
-            let keys = readKeysFromFile(keyPath);
-            keys.forEach(item => {
-                item.remainingUses = 0
-            })
-            updateKeyFile(keys);
-            return `重置成功`.green
-        }
-    }else{
-        fs.writeFileSync(monthPath, month, 'utf-8');
-        let keys = readKeysFromFile(keyPath);
-        keys.forEach(item => {
-            item.remainingUses = 0
-        })
-        updateKeyFile(keys);
-        return `重置成功`.green
-    }
-}
-module.exports = { keyToUse,updateKeyFile,setKey,lsKey,clearKey};
+module.exports = { getKey,restartKey,updateKeyFile,setKey,lsKey,clearKey};

@@ -2,9 +2,12 @@
 const program = require('commander');
 const path = require('path');
 const customVersion = '1.0.7';
-const tiny = require(path.join(__dirname,'..', 'tiny.js'));
+const tiny = require(path.join(__dirname, '..', 'tiny.js'));
 const Tiny = new tiny();
 const colors = require('colors');
+const Spinner = require("cli-spinner").Spinner;
+const keyFIle = require(path.join(__dirname, '..', 'key.js'));
+const { restartKey } = keyFIle; //获取可用的key，更新key文件
 program
 	.usage('图片压缩工具'.green)
 	.option('tiny', 'CN:默认压缩当前文件夹的所有图片！EN:Compress all image files in the current folder by default'.green)
@@ -26,26 +29,18 @@ program
 		process.exit(0);
 	})
 	.on('option:key', key => {
-		try{
+		try {
 			console.log(Tiny.setKey(key));
-		}catch(e){
-			console.log('设置失败,请使用管理员权限设置'.red,e)
-		}
-		process.exit(0); // 退出进程
-	})
-	.on('option:ls', () => {
-		try{
-			console.log(Tiny.ls());
-		}catch(e){
-			console.log('查看失败,请使用管理员权限查看'.red,e)
+		} catch (e) {
+			console.log('设置失败,请使用管理员权限设置'.red, e);
 		}
 		process.exit(0); // 退出进程
 	})
 	.on('option:clear', key => {
-		try{
+		try {
 			console.log(Tiny.clear(key));
-		}catch(e){
-			console.log('删除失败,请使用管理员权限查看'.red,e)
+		} catch (e) {
+			console.log('删除失败,请使用管理员权限查看'.red, e);
 		}
 		process.exit(0); // 退出进程
 	})
@@ -55,72 +50,80 @@ program
 		process.exit(1);
 	})
 	.action(async () => {
-			let [command, arg1, arg2, arg3] = process.argv.slice(2);
-			if(!command){
-				try{
-					await Tiny.dir();
-				}catch (e) {
-					console.log('压缩失败'.red,e)
-				}
-				process.exit(0);
+		let spinner = new Spinner(`正在初始化...%s`);
+		spinner.start();
+		await restartKey();
+		spinner.stop(true);
+		let [command, arg1, arg2, arg3] = process.argv.slice(2);
+		if (!command) {
+			try {
+				await Tiny.dir();
+			} catch (e) {
+				console.log('压缩失败'.red, e);
 			}
-			switch (command) {
-				case '-f':
-				case '--file':
-					if (arg1 && !arg2 && !arg3) {
-						try {
-							await Tiny.file(arg1);
-						} catch (e){
-							console.log('文件查找失败，请检查文件是否存在'.red,e)
-						}
-						process.exit(0);
+			process.exit(0);
+		}
+		switch (command) {
+			case '-f':
+			case '--file':
+				if (arg1 && !arg2 && !arg3) {
+					try {
+						await Tiny.file(arg1);
+					} catch (e) {
+						console.log('文件查找失败，请检查文件是否存在'.red, e);
 					}
-					else if(arg1 && arg2 && arg3 && arg2.toLowerCase() === 'to'){
-						try {
-							await Tiny.fileTo(arg1,arg3);
-						} catch(e) {
-							console.log('文件查找失败，请检查文件是否存在'.red,e)
-						}
-						process.exit(0);
+					process.exit(0);
+				} else if (arg1 && arg2 && arg3 && arg2.toLowerCase() === 'to') {
+					try {
+						await Tiny.fileTo(arg1, arg3);
+					} catch (e) {
+						console.log('文件查找失败，请检查文件是否存在'.red, e);
 					}
-					else {
-						program.outputHelp();
-						process.exit(1);
-					}
-					break;
-				case '--dir':
-				case '-d':
-					if (arg1 && !arg2 && !arg3) {
-						try{
-							await Tiny.dir(arg1);
-						}catch (e) {
-							console.log('文件夹查找失败，请检查文件夹是否存在'.red,e)
-						}
-						process.exit(0);
-					}
-					else if(arg1 && arg2 && arg3 && arg2.toLowerCase() === 'to'){
-						// 实现你的压缩文件A命名为B的逻辑
-						try{
-							await Tiny.dirTo(arg1,arg3);
-						}catch (e) {
-							console.log('文件夹查找失败，请检查文件夹是否存在'.red,e)
-						}
-
-						process.exit(0);
-
-					}
-					else {
-						program.outputHelp();
-						process.exit(1);
-					}
-					break;
-				default:
+					process.exit(0);
+				} else {
 					program.outputHelp();
 					process.exit(1);
-					break;
-			}
+				}
+				break;
+			case '--dir':
+			case '-d':
+				if (arg1 && !arg2 && !arg3) {
+					try {
+						await Tiny.dir(arg1);
+					} catch (e) {
+						console.log('文件夹查找失败，请检查文件夹是否存在'.red, e);
+					}
+					process.exit(0);
+				} else if (arg1 && arg2 && arg3 && arg2.toLowerCase() === 'to') {
+					// 实现你的压缩文件A命名为B的逻辑
+					try {
+						await Tiny.dirTo(arg1, arg3);
+					} catch (e) {
+						console.log('文件夹查找失败，请检查文件夹是否存在'.red, e);
+					}
+
+					process.exit(0);
+				} else {
+					program.outputHelp();
+					process.exit(1);
+				}
+				break;
+			case '-l':
+			case '--ls':
+				try {
+					console.log(Tiny.ls());
+				} catch (e) {
+					console.log('查看失败,请使用管理员权限查看'.red, e);
+				}
+				process.exit(0);
+				break;
+			default:
+				program.outputHelp();
+				process.exit(1);
+				break;
+		}
 	})
-// 	.error(`CN:错误，找不到该命令，请输入 tiny -h 或者 tiny help 获取帮助信息
-// en:Error, the command cannot be found, please enter tiny -h or tiny help to get help information`.red)
+	// 	.error(`CN:错误，找不到该命令，请输入 tiny -h 或者 tiny help 获取帮助信息
+	// en:Error, the command cannot be found, please enter tiny -h or tiny help to get help information`.red)
 	//获取错误信息
 	.parse(process.argv); // 解析命令行参数
